@@ -1,108 +1,59 @@
 const { Router } = require('express');
-const router = Router();
-
-const User = require('../models/User')
-
 const jwt = require('jsonwebtoken');
+const User = require('../models/user');
+const { verifyToken } = require('../middleware/auth');
+const { jwtSecret, jwtExpiresIn } = require('../config');
 
-router.get('/',(req,res)=> res.send('hello world'))
+const router = Router();
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-router.post('/signup', async (req,res) =>{
+const sign = (user) => jwt.sign({ sub: user._id.toString() }, jwtSecret, { expiresIn: jwtExpiresIn });
 
-    const { email, password } = req.body; 
+function validate(req, res) {
+  const { email, password } = req.body || {};
+  if (!EMAIL.test(email || '')) return res.status(400).json({ error: 'Correo inválido' }) && null;
+  if (!password || password.length < 8) return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' }) && null;
+  return { email: email.toLowerCase().trim(), password };
+}
 
-    const newUser = new User({email, password});
+router.get('/', (req, res) => res.json({ ok: true, servicio: 'mean-auth-starter' }));
 
-    await newUser.save();
-
-   /* console.log(newUser) console.log(email) console.log(req.body)*/ /*request body*/
-
-   const token = jwt.sign({_id:newUser._id}, 'secretkey')
-
-   res.status(200).json({token})
-    /*res.send('test');*/
-})
-router.post ('/signin', async (req,res) => {
-
-    const { email, password } = req.body;
-
-    const user = await User.findOne({email})
-
-    if (!user) return res.status(401).send("the email doesn't exists");
-
-    if (user.password !== password) return res.status(401).send('wrong password');
-
-    const token = jwt.sign({_id: user._id}, 'secretkey');
-
-    return res.status(200).json({token});
+router.post('/signup', async (req, res, next) => {
+  try {
+    const data = validate(req, res);
+    if (!data) return;
+    if (await User.exists({ email: data.email })) return res.status(409).json({ error: 'Ese correo ya está registrado' });
+    const user = await User.create(data);
+    return res.status(201).json({ token: sign(user) });
+  } catch (err) { return next(err); }
 });
-router.get('/tasks', (req,res) => {
-    res.json([
-        {
-             _id: 1,
-             name: 'task one',
-             description: 'lorem ipsum',
-             date: "2020-5-11"
 
-        },
-        {
-            _id: 2,
-            name: 'task one',
-            description: 'lorem ipsum',
-            date: "2020-5-11"
+router.post('/signin', async (req, res, next) => {
+  try {
+    const data = validate(req, res);
+    if (!data) return;
+    const user = await User.findOne({ email: data.email }).select('+password');
+    // Mismo mensaje para correo o contraseña incorrectos: no revela qué cuentas existen.
+    if (!user || !(await user.matches(data.password))) return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
+    return res.json({ token: sign(user) });
+  } catch (err) { return next(err); }
+});
 
-       },
-       {
-        _id: 3,
-        name: 'task one',
-        description: 'lorem ipsum',
-        date: "2020-5-11"
-       }
-    ])
-})
+const sample = [
+  { _id: 1, name: 'Diseñar la base de datos', done: true },
+  { _id: 2, name: 'Crear el login con JWT', done: true },
+  { _id: 3, name: 'Proteger rutas privadas', done: false },
+];
 
-router.get('/private-tasks', verifyToken, (req,res) => {
-    res.json([
-        {
-             _id: 1,
-             name: 'task one',
-             description: 'lorem ipsum',
-             date: "2020-5-11"
+router.get('/tasks', (req, res) => res.json(sample));
+router.get('/private-tasks', verifyToken, (req, res) => res.json(sample.map((t) => ({ ...t, private: true }))));
 
-        },
-        {
-            _id: 2,
-            name: 'task one',
-            description: 'lorem ipsum',
-            date: "2020-5-11"
-
-       },
-       {
-        _id: 3,
-        name: 'task one',
-        description: 'lorem ipsum',
-        date: "2020-5-11"
-       }
-    ])
-})
-
-router.get('/profile', verifyToken, (req,res) => {
-    res.send(req.userId);
-})
+router.get('/profile', verifyToken, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    return res.json({ id: user._id, email: user.email, createdAt: user.createdAt });
+  } catch (err) { return next(err); }
+});
 
 module.exports = router;
-
-function verifyToken(req, res, next){
-
-    if (!req.headers.authorization){
-        return res.status(401).send('unathorize request');
-    }
-    const token = req.headers.authorization.split(' ')[1]
-     if (token === 'null'){
-     return res.status(401).send('unathorize request');
-      /*console.log(req.headers.authorization)*/
-     }
-    const payload = jwt.verify(token,'secretkey')
-    req.userId = payload._id;
-    next();
-}

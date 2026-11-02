@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MEAN Auth Starter — demo en vivo · Abixai Prin</title>
+<meta name="description" content="Demo interactiva de autenticación con JWT sobre el stack MEAN (MongoDB, Express, Angular, Node.js). Proyecto de aprendizaje modernizado por Abixai Prin.">
+<meta property="og:title" content="MEAN Auth Starter — demo en vivo">
+<meta property="og:description" content="Registro, inicio de sesión y rutas protegidas con JWT. Pruébalo en el navegador.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 4 36 34H4Z' fill='none' stroke='%230D1F16' stroke-width='3'/%3E%3Cpath d='M20 14 28 29H17' fill='none' stroke='%237BD62E' stroke-width='3'/%3E%3C/svg%3E">
+<style>
+:root{--forest:#0D1F16;--forest2:#163223;--lime:#B6F23D;--leaf:#2E9E57;--cream:#F2F6EA;--ink:#0D1F16;--muted:#4D6355;--line:#D3DECB;--plum:#6A1FD0;
+--sans:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,Arial,sans-serif;--mono:ui-monospace,"Cascadia Code",Consolas,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--cream);color:var(--ink);font:400 1rem/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}:focus-visible{outline:2px solid var(--leaf);outline-offset:3px}
+.wrap{max-width:72rem;margin:0 auto;padding:0 1.5rem}
+/* portada */
+.hero{background:var(--forest);color:var(--cream);position:relative;overflow:hidden;padding:1.4rem 0 5rem}
+.hero:before{content:"";position:absolute;inset:0;background:radial-gradient(40rem 26rem at 78% 30%,rgba(182,242,61,.22),transparent 70%),radial-gradient(30rem 20rem at 10% 90%,rgba(46,158,87,.35),transparent 70%)}
+.nav{position:relative;display:flex;align-items:center;gap:1rem;font-weight:600}
+.nav svg{width:28px;height:28px}.nav a{margin-left:auto;text-decoration:none;border:1px solid rgba(242,246,234,.35);padding:.4rem .9rem;border-radius:999px;font-size:.9rem}
+.nav a:hover{background:var(--lime);color:var(--forest);border-color:var(--lime)}
+.hgrid{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:3rem;align-items:center;margin-top:4rem}
+@media (max-width:860px){.hgrid{grid-template-columns:1fr}}
+.pill{display:inline-block;font-size:.85rem;font-weight:700;color:var(--forest);background:var(--lime);padding:.25rem .8rem;border-radius:999px}
+h1{font-size:clamp(3rem,8vw,6.4rem);line-height:.86;letter-spacing:-.06em;margin:1rem 0 0;font-weight:850}
+h1 span{color:var(--lime)}
+.lead{font-size:1.15rem;max-width:32rem;color:#C9D6C4;margin:1.4rem 0 0}
+.cta{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:2rem}
+.btn{display:inline-flex;align-items:center;gap:.5rem;font:inherit;font-weight:700;padding:.85rem 1.35rem;border-radius:999px;border:2px solid var(--lime);background:var(--lime);color:var(--forest);text-decoration:none;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--cream);border-color:rgba(242,246,234,.4)}
+.btn:hover{transform:translateY(-2px)}
+/* diagrama */
+.flow{position:relative;aspect-ratio:1;max-width:420px;width:100%;justify-self:center}
+.flow svg{width:100%;height:100%;overflow:visible}
+.node rect{fill:var(--forest2);stroke:rgba(182,242,61,.5);stroke-width:1.5}
+.node text{fill:var(--cream);font:700 15px var(--sans)}
+.node .sub{fill:#9FB59A;font:500 11px var(--sans)}
+.wire{stroke:rgba(182,242,61,.35);stroke-width:2;fill:none;stroke-dasharray:6 6}
+.packet{fill:var(--lime)}
+/* secciones */
+section{padding:5rem 0}
+h2{font-size:clamp(2.2rem,5vw,3.6rem);letter-spacing:-.05em;line-height:.95;margin:0 0 1rem;font-weight:850}
+.sub2{color:var(--muted);max-width:40rem;margin:0 0 2.5rem}
+.feat{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+@media (max-width:860px){.feat{grid-template-columns:1fr 1fr}}@media (max-width:520px){.feat{grid-template-columns:1fr}}
+.f{background:#fff;border:1px solid var(--line);border-radius:18px;padding:1.4rem}
+.f b{display:block;font-size:1.15rem;margin:.6rem 0 .3rem;letter-spacing:-.02em}.f p{margin:0;color:var(--muted);font-size:.93rem}
+.f i{display:grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:12px;background:var(--lime);font-style:normal;font-weight:800}
+/* demo */
+.demo{background:#E6EEDB}
+.dgrid{display:grid;grid-template-columns:.9fr 1.1fr;gap:1.2rem}
+@media (max-width:860px){.dgrid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:1.4rem;min-width:0}
+.tabs{display:flex;gap:.4rem;margin-bottom:1rem}
+.tab{font:inherit;font-weight:700;border:1.5px solid var(--ink);background:transparent;border-radius:999px;padding:.35rem .9rem;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--lime)}
+label{display:grid;gap:.3rem;font-size:.85rem;font-weight:600;margin-bottom:.8rem}
+input,select{font:inherit;padding:.7rem .85rem;border:1.5px solid var(--line);border-radius:12px;background:var(--cream);color:var(--ink);min-width:0}
+input:focus,select:focus{outline:none;border-color:var(--leaf)}
+.row{display:flex;gap:.5rem;flex-wrap:wrap}
+.row .btn{border-color:var(--ink);background:var(--ink);color:var(--lime);padding:.65rem 1.1rem}
+.row .btn.alt{background:transparent;color:var(--ink)}
+.mode{font-size:.85rem;color:var(--muted);margin-top:1rem;display:grid;gap:.4rem}
+.console{background:var(--forest);color:#D6E6CF;border-radius:20px;padding:1rem 1.2rem;font:13px/1.55 var(--mono);min-height:22rem;max-height:28rem;overflow:auto}
+.console .req{color:var(--lime)}.console .ok{color:#7BE495}.console .err{color:#FF8A80}.console .dim{color:#7E957A}
+.console pre{margin:.2rem 0 .9rem;white-space:pre-wrap;word-break:break-all}
+.status{display:flex;align-items:center;gap:.5rem;margin-top:1rem;font-size:.9rem;font-weight:600}
+.dot{width:.6rem;height:.6rem;border-radius:50%;background:#C9C9C9}.dot.on{background:var(--leaf)}
+/* endpoints */
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+th,td{text-align:left;padding:.8rem 1rem;border-bottom:1px solid var(--line);font-size:.93rem}
+th{background:var(--forest);color:var(--cream);font-weight:700}
+code{font-family:var(--mono);font-size:.88em;background:#EEF3E6;padding:.1rem .35rem;border-radius:6px}
+.tblwrap{overflow-x:auto;max-width:100%}
+.steps>*,.feat>*,.hgrid>*,.dgrid>*{min-width:0}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}@media (max-width:860px){.steps{grid-template-columns:1fr}}
+.steps pre{background:var(--forest);color:var(--cream);padding:1rem;border-radius:14px;overflow-x:auto;font:13px/1.5 var(--mono);margin:.6rem 0 0}
+.note{background:#fff;border-left:4px solid var(--plum);padding:1rem 1.2rem;border-radius:0 14px 14px 0;margin-top:2rem;color:var(--muted)}
+footer{background:var(--forest);color:#C9D6C4;padding:2.5rem 0}
+footer .wrap{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center}
+footer b{color:var(--cream)}footer a{color:var(--lime)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn:hover{transform:none}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <nav class="nav"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4 36 34H4Z" fill="none" stroke="#F2F6EA" stroke-width="2.6" stroke-linejoin="round"/><path d="M20 14 28 29H17" fill="none" stroke="#B6F23D" stroke-width="2.6" stroke-linejoin="round"/></svg>Abixai Prin<a href="https://github.com/abixaiprin/mean-project">Ver código en GitHub</a></nav>
+    <div class="hgrid">
+      <div>
+        <span class="pill">Proyecto de aprendizaje · modernizado en 2026</span>
+        <h1 class="h-in">MEAN<br><span>Auth Starter.</span></h1>
+        <p class="lead h-in">Registro, inicio de sesión y rutas protegidas con JWT sobre MongoDB, Express, Angular y Node.js. Contraseñas cifradas con bcrypt y tokens que expiran.</p>
+        <div class="cta h-in"><a class="btn" href="#demo">Probar la demo</a><a class="btn ghost" href="#instalar">Usarlo en tu proyecto</a></div>
+      </div>
+      <div class="flow" aria-label="Flujo: Angular envía credenciales a Express, Express consulta MongoDB y devuelve un JWT">
+        <svg viewBox="0 0 420 420">
+          <path id="w1" class="wire" d="M110 90 C 210 90, 210 210, 310 210"/>
+          <path id="w2" class="wire" d="M310 210 C 210 210, 210 330, 110 330"/>
+          <path id="w3" class="wire" d="M110 330 C 40 260, 40 160, 110 90"/>
+          <g class="node" transform="translate(30 60)"><rect width="160" height="60" rx="16"/><text x="18" y="30">Angular</text><text class="sub" x="18" y="47">formulario + token</text></g>
+          <g class="node" transform="translate(230 180)"><rect width="160" height="60" rx="16"/><text x="18" y="30">Express API</text><text class="sub" x="18" y="47">bcrypt · JWT</text></g>
+          <g class="node" transform="translate(30 300)"><rect width="160" height="60" rx="16"/><text x="18" y="30">MongoDB</text><text class="sub" x="18" y="47">usuarios cifrados</text></g>
+          <circle class="packet" id="pk" r="7" cx="110" cy="90"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <h2>Lo que incluye</h2>
+      <p class="sub2">Una base pequeña y clara para entender y reutilizar la autenticación con tokens.</p>
+      <div class="feat">
+        <div class="f rv"><i>01</i><b>Registro e inicio de sesión</b><p>Endpoints <code>/signup</code> y <code>/signin</code> con validación de correo y contraseña.</p></div>
+        <div class="f rv"><i>02</i><b>Contraseñas cifradas</b><p>bcrypt con 12 rondas. Nunca se guardan ni se devuelven en texto plano.</p></div>
+        <div class="f rv"><i>03</i><b>JWT que expira</b><p>Firma con una clave en <code>.env</code> y vencimiento configurable.</p></div>
+        <div class="f rv"><i>04</i><b>Rutas protegidas</b><p>Middleware <code>verifyToken</code> con mensajes claros para token vencido o inválido.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="demo" class="demo">
+    <div class="wrap">
+      <h2>Pruébalo aquí</h2>
+      <p class="sub2">Crea una cuenta, inicia sesión y pide datos privados. En el modo <b>simulado</b> todo ocurre en tu navegador; en el modo <b>API local</b> se conecta a tu backend en <code>localhost:3000</code>.</p>
+      <div class="dgrid">
+        <div class="card">
+          <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-t="signup">Crear cuenta</button><button class="tab" role="tab" aria-selected="false" data-t="signin">Iniciar sesión</button></div>
+          <form id="f">
+            <label>Correo<input id="email" type="email" required autocomplete="username" placeholder="tu@correo.com"></label>
+            <label>Contraseña (mín. 8)<input id="pass" type="password" required minlength="8" autocomplete="current-password"></label>
+            <div class="row"><button class="btn" id="go" type="submit">Crear cuenta</button></div>
+          </form>
+          <div class="row" style="margin-top:1rem"><button class="btn alt" id="priv" type="button">GET /private-tasks</button><button class="btn alt" id="prof" type="button">GET /profile</button><button class="btn alt" id="out" type="button">Cerrar sesión</button></div>
+          <div class="status"><span class="dot" id="dot"></span><span id="who">Sin sesión</span></div>
+          <div class="mode"><label style="margin:0">Modo<select id="mode"><option value="mock">Simulado en el navegador</option><option value="local">API local (http://localhost:3000/api)</option></select></label></div>
+        </div>
+        <div class="console" id="log" aria-live="polite"><span class="dim">// Aquí verás cada petición y su respuesta, como en Postman.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Endpoints</h2>
+      <div class="tblwrap"><table>
+        <tr><th>Método</th><th>Ruta</th><th>Auth</th><th>Qué hace</th></tr>
+        <tr><td>POST</td><td><code>/api/signup</code></td><td>—</td><td>Crea el usuario y devuelve un token (201)</td></tr>
+        <tr><td>POST</td><td><code>/api/signin</code></td><td>—</td><td>Valida credenciales y devuelve un token</td></tr>
+        <tr><td>GET</td><td><code>/api/tasks</code></td><td>—</td><td>Datos públicos de ejemplo</td></tr>
+        <tr><td>GET</td><td><code>/api/private-tasks</code></td><td>Bearer</td><td>Datos privados de ejemplo</td></tr>
+        <tr><td>GET</td><td><code>/api/profile</code></td><td>Bearer</td><td>Correo y fecha de registro del usuario</td></tr>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="instalar" style="padding-top:0">
+    <div class="wrap">
+      <h2>Úsalo en tu proyecto</h2>
+      <div class="steps">
+        <div class="f"><b>1. Clona</b><pre>git clone https://github.com/abixaiprin/mean-project
+cd mean-project/backend
+npm install</pre></div>
+        <div class="f"><b>2. Configura</b><pre>cp .env.example .env
+# MONGODB_URI y JWT_SECRET</pre></div>
+        <div class="f"><b>3. Ejecuta</b><pre>npm run dev
+# http://localhost:3000/api</pre></div>
+      </div>
+      <p class="note">Nació en 2020 como proyecto de aprendizaje y se modernizó en 2026 con contraseñas cifradas, tokens con vencimiento, validación y manejo de errores. Para producción agrega límites de intentos (rate limiting), HTTPS y pruebas.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><b>Abixai Prin</b> · Full Stack desde 2017 · <i>I build tools that save people time.</i></span>
+    <span><a href="https://dev-abixai.netlify.app">dev-abixai.netlify.app</a> · <a href="https://github.com/abixaiprin">GitHub</a> · <a href="https://ko-fi.com/abixaiprin">Ko-fi ☕</a></span>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* ---------- animaciones ---------- */
+  if(window.gsap&&!reduce){
+    gsap.registerPlugin(MotionPathPlugin,ScrollTrigger);
+    gsap.from('.h-in,.pill',{y:30,opacity:0,duration:.8,stagger:.12,ease:'power3.out'});
+    gsap.from('.node',{scale:.6,opacity:0,transformOrigin:'center',duration:.6,stagger:.15,delay:.3,ease:'back.out(1.7)'});
+    var tl=gsap.timeline({repeat:-1,delay:1});
+    ['#w1','#w2','#w3'].forEach(function(p){tl.to('#pk',{duration:1.1,ease:'power1.inOut',motionPath:{path:p,align:p,alignOrigin:[.5,.5]}})});
+    gsap.to('.wire',{strokeDashoffset:-48,duration:2,repeat:-1,ease:'none'});
+    gsap.utils.toArray('.rv').forEach(function(el,i){gsap.from(el,{y:40,opacity:0,duration:.7,delay:i*.08,scrollTrigger:{trigger:el,start:'top 88%'}})});
+  }
+  /* ---------- demo ---------- */
+  var mode='mock',tab='signup',token=null,users={};
+  try{users=JSON.parse(localStorage.getItem('mean-demo-users')||'{}')}catch(e){}
+  var log=document.getElementById('log'),go=document.getElementById('go'),who=document.getElementById('who'),dot=document.getElementById('dot');
+  function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+  function write(req,status,body){
+    var cls=status<300?'ok':'err';
+    log.insertAdjacentHTML('beforeend','<div class="req">'+esc(req)+'</div><div class="'+cls+'">'+status+'</div><pre>'+esc(JSON.stringify(body,null,2))+'</pre>');
+    log.scrollTop=log.scrollHeight;
+    if(window.gsap&&!reduce)gsap.from(log.lastElementChild,{opacity:0,x:-10,duration:.3});
+  }
+  function b64(o){return btoa(JSON.stringify(o)).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_')}
+  async function sha(s){var d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(d)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')}
+  function save(){try{localStorage.setItem('mean-demo-users',JSON.stringify(users))}catch(e){}}
+  function fakeJwt(id){var now=Math.floor(Date.now()/1000);return b64({alg:'HS256',typ:'JWT'})+'.'+b64({sub:id,iat:now,exp:now+7200})+'.demo-signature'}
+  /* API simulada con las mismas reglas que el backend real */
+  async function mock(method,path,body,auth){
+    await new Promise(function(r){setTimeout(r,250)});
+    var EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(path==='/signup'||path==='/signin'){
+      var email=(body.email||'').toLowerCase().trim();
+      if(!EMAIL.test(email))return [400,{error:'Correo inválido'}];
+      if(!body.password||body.password.length<8)return [400,{error:'La contraseña debe tener al menos 8 caracteres'}];
+      var h=await sha(body.password);
+      if(path==='/signup'){if(users[email])return [409,{error:'Ese correo ya está registrado'}];
+        users[email]={id:'u'+Date.now().toString(36),hash:h,createdAt:new Date().toISOString()};save();return [201,{token:fakeJwt(users[email].id)}];}
+      if(!users[email]||users[email].hash!==h)return [401,{error:'Correo o contraseña incorrectos'}];
+      return [200,{token:fakeJwt(users[email].id)}];
+    }
+    if(!auth)return [401,{error:'Falta el token. Envía Authorization: Bearer <token>'}];
+    var id;try{id=JSON.parse(atob(auth.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))).sub}catch(e){return [401,{error:'Token inválido'}]}
+    var u=Object.keys(users).filter(function(k){return users[k].id===id})[0];
+    if(path==='/profile')return u?[200,{id:id,email:u,createdAt:users[u].createdAt}]:[404,{error:'Usuario no encontrado'}];
+    return [200,[{_id:1,name:'Diseñar la base de datos',done:true,private:true},{_id:2,name:'Crear el login con JWT',done:true,private:true},{_id:3,name:'Proteger rutas privadas',done:false,private:true}]];
+  }
+  async function call(method,path,body){
+    var label=method+' /api'+path+(token&&method==='GET'?'   Authorization: Bearer '+token.slice(0,18)+'…':'');
+    try{
+      var r;
+      if(mode==='mock'){r=await mock(method,path,body||{},token);}
+      else{
+        var res=await fetch('http://localhost:3000/api'+path,{method:method,headers:Object.assign({'Content-Type':'application/json'},token?{Authorization:'Bearer '+token}:{}),body:body?JSON.stringify(body):undefined});
+        r=[res.status,await res.json().catch(function(){return {}})];
+      }
+      write(label+(body?'\n'+JSON.stringify({email:body.email,password:'••••••••'}):''),r[0],r[1]);
+      return r;
+    }catch(e){write(label,0,{error:'No se pudo conectar con http://localhost:3000. ¿Está corriendo el backend?'});return [0,{}]}
+  }
+  function setToken(t,email){token=t;dot.classList.toggle('on',!!t);who.textContent=t?'Sesión iniciada'+(email?' como '+email:''):'Sin sesión';}
+  document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){tab=b.dataset.t;document.querySelectorAll('.tab').forEach(function(x){x.setAttribute('aria-selected',x===b)});go.textContent=tab==='signup'?'Crear cuenta':'Iniciar sesión';}});
+  document.getElementById('f').onsubmit=async function(e){e.preventDefault();var email=document.getElementById('email').value,pass=document.getElementById('pass').value;
+    var r=await call('POST','/'+tab,{email:email,password:pass});if(r[0]>=200&&r[0]<300&&r[1].token)setToken(r[1].token,email.toLowerCase());};
+  document.getElementById('priv').onclick=function(){call('GET','/private-tasks')};
+  document.getElementById('prof').onclick=function(){call('GET','/profile')};
+  document.getElementById('out').onclick=function(){setToken(null);log.insertAdjacentHTML('beforeend','<div class="dim">// Sesión cerrada: el token se borró del cliente.</div>')};
+  document.getElementById('mode').onchange=function(){mode=this.value;setToken(null);log.insertAdjacentHTML('beforeend','<div class="dim">// Modo: '+(mode==='mock'?'simulado en el navegador':'API local')+'</div>')};
+})();
+</script>
+</body>
+</html>

@@ -1,13 +1,25 @@
-const express = require('express'); /* para inicializar el servidor con express*/
-const app = express();
+const express = require('express');
 const cors = require('cors');
+const config = require('./config');
+const { connect } = require('./database');
 
-require('./database'); /* anclar base de datos*/
+const app = express();
+app.use(cors({ origin: config.corsOrigin }));
+app.use(express.json({ limit: '10kb' }));
+app.use('/api', require('./routes'));
 
-app.use(cors());
-app.use(express.json());
+app.use((req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: 'Error interno' });
+});
 
-app.use('/api',require('./routes/index'))
+connect()
+  .then(() => app.listen(config.port, () => console.log(`API en http://localhost:${config.port}/api`)))
+  .catch((err) => {
+    console.error('No se pudo conectar a MongoDB:', err.message);
+    process.exit(1);
+  });
 
-app.listen(3000);
-console.log('server on port',3000);
+module.exports = app;

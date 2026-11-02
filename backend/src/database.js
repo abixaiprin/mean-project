@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/angular-jwt', {
-    useNewUrlParser: true,
-    useUnifiedTopology:true
+const { mongoUri } = require('./config');
 
-})
+async function connect() {
+  await mongoose.connect(mongoUri);
+  console.log('MongoDB conectado');
+}
 
-         .then(db => console.log('db is connect'))
-         .catch (err => console.log(err));
+module.exports = { connect };
